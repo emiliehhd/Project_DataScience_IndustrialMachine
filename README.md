@@ -147,7 +147,7 @@ projet_maintenance/
 
 Meilleur ROC-AUC (0.9999) et meilleur Recall (99.4%) sur le test set, confirmés par la validation croisée stratifiée 5-fold. Dans un contexte industriel, minimiser les faux négatifs (pannes non détectées) est la priorité absolue. Le Random Forest offre le meilleur compromis entre performance, stabilité et interprétabilité.
 
-Seuil de décision optimisé : **0.48** (maximisation du F1-Score, contre 0.50 par défaut).
+Seuil de décision optimisé : 0.48 (maximisation du F1-Score, contre 0.50 par défaut).
 
 ---
 
@@ -172,7 +172,7 @@ Le pipeline est ajusté (`fit`) exclusivement sur le train set, puis appliqué (
 
 `StratifiedKFold` à 5 folds appliquée sur le train set pour préserver les proportions de classes à chaque fold. Métriques reportées : Accuracy, F1, ROC-AUC, Recall, Precision.
 
-### Feature engineering
+### Feature Engi
 
 Trois variables dérivées ont été construites à partir des capteurs bruts :
 - `temp_over_rpm` : ratio température moteur / RPM
@@ -187,16 +187,4 @@ Trois variables dérivées ont été construites à partir des capteurs bruts :
 
 Variables les plus influentes identifiées par SHAP : `rul_hours`, `vibration_rms`, `temperature_motor`, `hours_since_maintenance`, `vibration_x_current`.
 
----
-
-## Choix méthodologiques clés
-
-**Pourquoi le Recall est la métrique prioritaire ?**
-Dans un contexte de maintenance industrielle, un faux négatif (panne non détectée) est bien plus coûteux qu'un faux positif (intervention préventive inutile). Le Recall mesure la capacité du modèle à détecter toutes les pannes réelles ; c'est donc la métrique la plus alignée avec l'enjeu métier.
-
-**Pourquoi le Random Forest est préféré au Gradient Boosting ?**
-Les deux modèles affichent des performances très proches. Le Random Forest est retenu car il offre un Recall légèrement supérieur (0.9944 vs 0.9916), un temps d'entraînement nettement plus court (10s vs 33s), et une interprétabilité comparable via la Feature Importance et SHAP.
-
-**Pourquoi le Deep Learning (MLP) n'est pas le modèle final ?**
-Le MLP obtient d'excellentes performances (ROC-AUC = 0.9991) mais reste en retrait par rapport aux méthodes ensemblistes sur ce dataset tabulaire de taille modérée. Son coût computationnel plus élevé et sa moindre interprétabilité le défavorisent dans ce contexte industriel où l'explicabilité des décisions est requise.
 
