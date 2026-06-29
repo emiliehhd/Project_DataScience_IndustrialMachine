@@ -20,11 +20,16 @@ Intérêt métier :
 
 ## Installation
 
-Cloner le dépôt :
+Créer et activer un environnement virtuel Python :
 
 ```bash
-git clone https://github.com/<votre-compte>/projet-maintenance-predictive.git
-cd projet-maintenance-predictive
+python -m venv venv_maintenance
+
+# WIndows
+venv_maintenance\Scripts\activate
+
+# Linux / Mac
+source venv_maintenance/bin/activate
 ```
 
 Installer les dépendances :
@@ -48,10 +53,10 @@ Les scripts doivent être lancés dans l'ordre depuis le dossier `src/` :
 ```bash
 cd src
 
-python 1_EDA.py
-python 2_preprocessing.py
-python 3_modeling.py
-python 4_evaluation.py
+python 01_EDA.py
+python 02_preprocessing.py
+python 03_modeling.py
+python 04_evaluation.py
 ```
 
 Lancer le dashboard :
@@ -67,22 +72,6 @@ streamlit run app.py
 
 Le dashboard est organisé de la manière suivante :
 
----
-
-## Dépendances principales
-
-```
-pandas
-numpy
-scikit-learn
-imbalanced-learn
-shap
-streamlit
-matplotlib
-seaborn
-plotly
-joblib
-```
 ---
 
 ## Dataset
