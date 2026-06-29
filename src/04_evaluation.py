@@ -277,6 +277,9 @@ print(f"\n[8] SHAP sur le meilleur modèle : {best_model_name}...")
 
 best_model = models[best_model_name]
 
+# Conversion en liste Python pure — évite l'erreur d'indexation avec shap
+feature_names_list = list(feature_names)
+
 # Sous-échantillon pour SHAP (performance)
 np.random.seed(42)
 shap_idx = np.random.choice(len(X_test), size=min(500, len(X_test)), replace=False)
@@ -285,20 +288,25 @@ X_shap = X_test[shap_idx]
 if best_model_name in ["RandomForest", "GradientBoosting"]:
     explainer = shap.TreeExplainer(best_model)
     shap_values = explainer.shap_values(X_shap)
-    if isinstance(shap_values, list):  # RF renvoie une liste [class0, class1]
-        shap_vals = shap_values[1]
+    sv = np.array(shap_values)
+    # Selon la version de shap/sklearn : liste [class0, class1] ou array 3D (n, f, 2)
+    if sv.ndim == 3:
+        shap_vals = sv[:, :, 1]
+    elif isinstance(shap_values, list):
+        shap_vals = np.array(shap_values[1])
     else:
-        shap_vals = shap_values
+        shap_vals = sv
 elif best_model_name == "LogisticRegression":
     explainer = shap.LinearExplainer(best_model, X_shap)
-    shap_vals = explainer.shap_values(X_shap)
+    shap_vals = np.array(explainer.shap_values(X_shap))
 else:
     explainer = shap.KernelExplainer(best_model.predict_proba, shap.sample(X_shap, 50))
-    shap_vals = explainer.shap_values(X_shap)[:, :, 1]
+    sv = np.array(explainer.shap_values(X_shap))
+    shap_vals = sv[:, :, 1] if sv.ndim == 3 else sv
 
 # SHAP Summary Plot (beeswarm)
 fig = plt.figure(figsize=(10, 8))
-shap.summary_plot(shap_vals, X_shap, feature_names=feature_names, show=False, max_display=15)
+shap.summary_plot(shap_vals, X_shap, feature_names=feature_names_list, show=False, max_display=15)
 plt.title(f"SHAP Summary Plot — {best_model_name}", fontsize=12, fontweight="bold")
 plt.tight_layout()
 plt.savefig("../outputs/12_shap_summary.png", dpi=150, bbox_inches="tight")
@@ -307,7 +315,7 @@ print("[OK] 12_shap_summary.png")
 
 # SHAP Bar Plot (importance globale)
 fig = plt.figure(figsize=(10, 7))
-shap.summary_plot(shap_vals, X_shap, feature_names=feature_names,
+shap.summary_plot(shap_vals, X_shap, feature_names=feature_names_list,
                   plot_type="bar", show=False, max_display=15)
 plt.title(f"SHAP Feature Importance Globale — {best_model_name}", fontsize=12, fontweight="bold")
 plt.tight_layout()
@@ -316,7 +324,7 @@ plt.close()
 print("[OK] 13_shap_bar.png")
 
 # Sauvegarde des SHAP values
-joblib.dump({"shap_values": shap_vals, "X_shap": X_shap, "feature_names": feature_names}, "../models/shap_data.pkl")
+joblib.dump({"shap_values": shap_vals, "X_shap": X_shap, "feature_names": feature_names_list}, "../models/shap_data.pkl")
 
 # ─────────────────────────────────────────────
 # 10. RAPPORT FINAL
